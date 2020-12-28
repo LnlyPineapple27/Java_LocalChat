@@ -28,24 +28,27 @@ public class ServerUi extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jTextField1 = new javax.swing.JTextField();
         MainFrame = new javax.swing.JTabbedPane();
         MessageTab = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea2 = new javax.swing.JTextArea();
+        ChatScreen = new javax.swing.JTextArea();
         jTextField2 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        SendButton = new javax.swing.JButton();
         OptionsTab = new javax.swing.JPanel();
         SettingsTab = new javax.swing.JPanel();
 
-        jTextField1.setText("jTextField1");
-        jTextField1.setName("jTextField1"); // NOI18N
-
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Server control");
+        setTitle("Chat control");
         setName("Form"); // NOI18N
 
         MainFrame.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -55,17 +58,38 @@ public class ServerUi extends javax.swing.JFrame {
         MessageTab.setLayout(new java.awt.BorderLayout());
 
         jPanel2.setName("jPanel2"); // NOI18N
+        jPanel2.setLayout(new java.awt.BorderLayout());
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 338, Short.MAX_VALUE)
-        );
+        jLabel1.setText("Online Users");
+        jLabel1.setName("jLabel1"); // NOI18N
+        jPanel2.add(jLabel1, java.awt.BorderLayout.PAGE_START);
+
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jTextArea1.setName("jTextArea1"); // NOI18N
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jPanel2.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jPanel1.setName("jPanel1"); // NOI18N
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jLabel2.setText("Connection status");
+        jLabel2.setName("jLabel2"); // NOI18N
+        jPanel1.add(jLabel2);
+
+        jScrollPane3.setName("jScrollPane3"); // NOI18N
+
+        jTextArea2.setColumns(20);
+        jTextArea2.setRows(5);
+        jTextArea2.setName("jTextArea2"); // NOI18N
+        jScrollPane3.setViewportView(jTextArea2);
+
+        jPanel1.add(jScrollPane3);
+
+        jPanel2.add(jPanel1, java.awt.BorderLayout.PAGE_END);
 
         MessageTab.add(jPanel2, java.awt.BorderLayout.LINE_START);
 
@@ -77,10 +101,10 @@ public class ServerUi extends javax.swing.JFrame {
 
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
-        jTextArea2.setColumns(20);
-        jTextArea2.setRows(5);
-        jTextArea2.setName("jTextArea2"); // NOI18N
-        jScrollPane2.setViewportView(jTextArea2);
+        ChatScreen.setColumns(20);
+        ChatScreen.setRows(5);
+        ChatScreen.setName("ChatScreen"); // NOI18N
+        jScrollPane2.setViewportView(ChatScreen);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -92,8 +116,13 @@ public class ServerUi extends javax.swing.JFrame {
         gridBagConstraints.weighty = 10.0;
         jPanel5.add(jScrollPane2, gridBagConstraints);
 
-        jTextField2.setText("jTextField2");
+        jTextField2.setText("Enter text here");
         jTextField2.setName("jTextField2"); // NOI18N
+        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField2ActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -104,11 +133,11 @@ public class ServerUi extends javax.swing.JFrame {
         gridBagConstraints.weightx = 2.0;
         jPanel5.add(jTextField2, gridBagConstraints);
 
-        jButton1.setText("Send");
-        jButton1.setName("jButton1"); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        SendButton.setText("Send");
+        SendButton.setName("SendButton"); // NOI18N
+        SendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                SendButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -118,7 +147,7 @@ public class ServerUi extends javax.swing.JFrame {
         gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.BASELINE_TRAILING;
-        jPanel5.add(jButton1, gridBagConstraints);
+        jPanel5.add(SendButton, gridBagConstraints);
 
         jPanel3.add(jPanel5, java.awt.BorderLayout.CENTER);
 
@@ -132,7 +161,7 @@ public class ServerUi extends javax.swing.JFrame {
         OptionsTab.setLayout(OptionsTabLayout);
         OptionsTabLayout.setHorizontalGroup(
             OptionsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 405, Short.MAX_VALUE)
+            .addGap(0, 412, Short.MAX_VALUE)
         );
         OptionsTabLayout.setVerticalGroup(
             OptionsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -147,7 +176,7 @@ public class ServerUi extends javax.swing.JFrame {
         SettingsTab.setLayout(SettingsTabLayout);
         SettingsTabLayout.setHorizontalGroup(
             SettingsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 405, Short.MAX_VALUE)
+            .addGap(0, 412, Short.MAX_VALUE)
         );
         SettingsTabLayout.setVerticalGroup(
             SettingsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -170,9 +199,13 @@ public class ServerUi extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_SendButtonActionPerformed
+
+    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -210,17 +243,23 @@ public class ServerUi extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    javax.swing.JTextArea ChatScreen;
     javax.swing.JTabbedPane MainFrame;
     javax.swing.JPanel MessageTab;
     javax.swing.JPanel OptionsTab;
+    javax.swing.JButton SendButton;
     javax.swing.JPanel SettingsTab;
-    javax.swing.JButton jButton1;
+    javax.swing.JLabel jLabel1;
+    javax.swing.JLabel jLabel2;
+    javax.swing.JPanel jPanel1;
     javax.swing.JPanel jPanel2;
     javax.swing.JPanel jPanel3;
     javax.swing.JPanel jPanel5;
+    javax.swing.JScrollPane jScrollPane1;
     javax.swing.JScrollPane jScrollPane2;
+    javax.swing.JScrollPane jScrollPane3;
+    javax.swing.JTextArea jTextArea1;
     javax.swing.JTextArea jTextArea2;
-    javax.swing.JTextField jTextField1;
     javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }

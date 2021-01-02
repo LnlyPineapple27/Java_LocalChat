@@ -6,80 +6,125 @@
 package client;
 
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import sound.notification_sound;
 /**
  *
  * @author admin
  */
 public class MainMenu extends javax.swing.JFrame {
-    public String username, host_ip, password;
-    int port;
-    Socket soc;
+    String username = "unknown", host_ip = "unknown";
+    int port = -1;
+    private ClientCore core = null;
+    private LoginUI parent;
+    private boolean has_date = true;
+    private boolean has_time = true;
+    SendFileUI child = null;
+    DateTimeFormatter _day;
+    DateTimeFormatter _time;
     
+    private boolean has_sound = true, is_active = false;
+    private notification_sound _player = new notification_sound();;
+    String folder = "";
     /**
      * Creates new form MainMenu
      */
+    public MainMenu(LoginUI ui) {
+        this.parent = ui;
+        _day = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
+        _time = DateTimeFormatter.ofPattern("HH:mm:ss");
+        initComponents();
+    }
     public MainMenu() {
+        this.parent = null;
+        _day = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
+        _time = DateTimeFormatter.ofPattern("HH:mm:ss");
         initComponents();
     }
     
-    public boolean startConnection(String name, String pass, String host, int port){
+    void printLog(String type, String msg){
+        String t = "", d = "";
+        LocalDateTime now = LocalDateTime.now();
+        if (has_date)
+            d = _day.format(now);
+            if (!has_time)
+                d += "-";
+            else
+                d += " ";
+        
+        if (has_time)
+            t = _time.format(now) + "-";
+        
+        if (has_sound) _player.play_sound();
+        this.EventLog.append(d + t + "[" + type + "]: " + msg + "\r\n");
+    }
+    public void startConnection(String name, String host, int port) throws Exception{
         this.username = name;
-        this.password = pass;
         this.port = port;
         this.host_ip = host;
+        this.is_active = true;
+        try{
+            this.core = new ClientCore(this, this.username, this.host_ip, this.port);
+        }
+        catch (Exception e){
+            throw e;
+        }
+        //this.printLog("CC", "dhkj");
         this.setVisible(true);
-        try {
-            soc = new Socket(this.host_ip, this.port);
-            dos = new DataOutputStream(socket.getOutputStream());
-            // gửi username đang kết nối
-            dos.writeUTF("CMD_JOIN "+ username);
-            appendMessage(" Đã kết nối", "Trạng thái", Color.GREEN, Color.GREEN);
-            appendMessage(" gửi tin nhắn bây giờ.!", "Trạng thái", Color.GREEN, Color.GREEN);
-            
-            // Khởi động Client Thread 
-            new Thread(new ClientThread(socket, this)).start();
-            jButton1.setEnabled(true);
-            // đã được kết nối
-            isConnected = true;
-            
-        }
-        catch(IOException e) {
-            isConnected = false;
-            JOptionPane.showMessageDialog(this, "Không thể kết nối đến máy chủ, vui lòng thử lại sau.!","Kết nối thất bại",JOptionPane.ERROR_MESSAGE);
-            appendMessage("[IOException]: "+ e.getMessage(), "Lỗi", Color.RED, Color.RED);
-        }
-        ArrayList<String> list = new ArrayList<String>(){{
-            add("Dat1");
-            add("datdeptrai");
-            for(int i = 0; i < 30; ++i){
-                add("datdeptrai" + i);
-            }
-        }};
-        updateOnlineList(list);
-        return true;
-    }
-    public void updateOnlineList(ArrayList<String> user_list){
-        try {
-            OnlineList.setEditable(true);
-            OnlineList.setContentType("text/html");
-            StringBuilder sb = new StringBuilder();
-            Iterator it = user_list.iterator();
-            sb.append("<html><table>");
-            while(it.hasNext()){
-                Object e = it.next();
-                sb.append("<tr><td>").append(e).append("</td></tr>");
+        /*Set<String> list = new HashSet<String>();
+        list.add("datpt");
+        list.add("datpt2");
+        updateOnlineList(list);*/
 
+    }
+    public void closeConnection(boolean is_quit){
+        if (this.is_active){
+            this.printLog("DISCONNECTING","please wait");
+            try{
+                
+                //TimeUnit.SECONDS.sleep(1);
+                this.core.stop_now(is_quit);
             }
-            sb.append("</table></body></html>");
-            OnlineList.removeAll();
-            OnlineList.setText(sb.toString());
-            OnlineList.setEditable(false);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            catch (Exception e){
+                this.printLog("CONNECTION CLOSE EXCEPTION", e.getMessage());
+                System.out.println(e.getMessage());
+            }
+            if (is_quit)
+                JOptionPane.showMessageDialog(null, "Main window will automatically close", "DISCONNECTED", JOptionPane.INFORMATION_MESSAGE);
+
+            this.setVisible(false);
+            this.is_active = false;
+            if (this.parent != null)
+                this.parent.setVisible(true);
         }
-    } 
+    }
+    boolean getConnectionStatus(){
+        if (this.core == null)
+            return false;
+        else
+            return this.core.getStatus();
+    }
+    void updateOnlineList(Set<String> user_list){
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) userTable.getModel();
+        model.setRowCount(0);//Clear table
+        if (user_list != null ){
+            if(!user_list.isEmpty()){
+                for(String i : user_list){
+                    Vector row = new Vector();
+                    row.add(i);
+                    model.addRow(row);
+                }
+            }
+        }
+        userTable.revalidate();//Show changes
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -91,82 +136,160 @@ public class MainMenu extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        OnlineList = new javax.swing.JTextPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        userTable = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        EventLog = new javax.swing.JTextPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        EventLog = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuItem4 = new javax.swing.JMenuItem();
+        ClearLog = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        HasSoundCheckBox = new javax.swing.JCheckBoxMenuItem();
+        HasTimeCheckBox = new javax.swing.JCheckBoxMenuItem();
+        HasDateCheckBox = new javax.swing.JCheckBoxMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jPanel1.setLayout(new java.awt.BorderLayout(1, 1));
 
-        jLabel4.setText("Online Users");
+        userTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
 
-        jScrollPane1.setViewportView(OnlineList);
+            },
+            new String [] {
+                "Online Users"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        userTable.setColumnSelectionAllowed(true);
+        userTable.getTableHeader().setReorderingAllowed(false);
+        userTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                userTableMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(userTable);
+        userTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE))
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 449, Short.MAX_VALUE)
         );
 
         jPanel1.add(jPanel3, java.awt.BorderLayout.LINE_START);
 
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.PAGE_AXIS));
 
+        jLabel2.setLabelFor(EventLog);
         jLabel2.setText("Events Log");
         jPanel4.add(jLabel2);
 
-        EventLog.setBackground(new java.awt.Color(102, 0, 102));
-        EventLog.setForeground(new java.awt.Color(255, 255, 0));
-        jScrollPane2.setViewportView(EventLog);
+        EventLog.setEditable(false);
+        EventLog.setColumns(20);
+        EventLog.setRows(5);
+        jScrollPane1.setViewportView(EventLog);
+        EventLog.getAccessibleContext().setAccessibleName("");
 
-        jPanel4.add(jScrollPane2);
+        jPanel4.add(jScrollPane1);
 
         jPanel1.add(jPanel4, java.awt.BorderLayout.CENTER);
 
         jMenu1.setText("Options");
 
-        jMenuItem1.setText("Create conversation");
+        jMenuItem1.setText("Message to all");
+        jMenuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jMenuItem1MousePressed(evt);
+            }
+        });
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem1);
 
-        jMenuItem3.setText("Send file to");
-        jMenu1.add(jMenuItem3);
-
-        jMenuItem4.setText("Exit");
-        jMenu1.add(jMenuItem4);
+        ClearLog.setText("Clear Event Log");
+        ClearLog.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                ClearLogMousePressed(evt);
+            }
+        });
+        jMenu1.add(ClearLog);
 
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Settings");
 
-        jCheckBoxMenuItem1.setSelected(true);
-        jCheckBoxMenuItem1.setText("Notification sound");
-        jCheckBoxMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBoxMenuItem1ActionPerformed(evt);
+        HasSoundCheckBox.setSelected(true);
+        HasSoundCheckBox.setText("Notification Sound");
+        HasSoundCheckBox.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                HasSoundCheckBoxMousePressed(evt);
             }
         });
-        jMenu2.add(jCheckBoxMenuItem1);
+        HasSoundCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                HasSoundCheckBoxActionPerformed(evt);
+            }
+        });
+        jMenu2.add(HasSoundCheckBox);
+
+        HasTimeCheckBox.setSelected(true);
+        HasTimeCheckBox.setText("Show timestamp in log");
+        HasTimeCheckBox.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                HasTimeCheckBoxMousePressed(evt);
+            }
+        });
+        HasTimeCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                HasTimeCheckBoxActionPerformed(evt);
+            }
+        });
+        jMenu2.add(HasTimeCheckBox);
+
+        HasDateCheckBox.setSelected(true);
+        HasDateCheckBox.setText("Show Datestamp in log");
+        HasDateCheckBox.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                HasDateCheckBoxMousePressed(evt);
+            }
+        });
+        HasDateCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                HasDateCheckBoxActionPerformed(evt);
+            }
+        });
+        jMenu2.add(HasDateCheckBox);
 
         jMenuBar1.add(jMenu2);
 
@@ -176,7 +299,9 @@ public class MainMenu extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 912, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,10 +311,134 @@ public class MainMenu extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jCheckBoxMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItem1ActionPerformed
+    private void HasSoundCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HasSoundCheckBoxActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBoxMenuItem1ActionPerformed
+        if(this.HasSoundCheckBox.isSelected())
+            this.has_sound = true;
+        else 
+            this.has_sound = false;
+        if (this.has_sound) _player.play_sound();
+    }//GEN-LAST:event_HasSoundCheckBoxActionPerformed
 
+    private void userTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userTableMouseClicked
+        // TODO add your handling code here:
+        //if (has_sound) _player.play_sound();
+        JTable source = (JTable)evt.getSource();
+        int row = source.rowAtPoint( evt.getPoint() );
+        int column = source.columnAtPoint( evt.getPoint() );
+        String s = source.getModel().getValueAt(row, column)+"";
+        String[] options = {"Send Message", "Send File", "Cancel"};
+        int choice = JOptionPane.showOptionDialog(this, "Choose a task to do with user: " + s , "Options", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,null, options, options[2]);
+        switch(choice){
+            case 0:
+                String input = JOptionPane.showInputDialog(this,"Enter your message to " + s, "User Input", JOptionPane.INFORMATION_MESSAGE);
+                if (input == null)
+                    return;
+                else{
+                    if (input.isBlank()){
+                        this.printLog("Could not send message", "Empty message");
+                        return;
+                    }
+                    try{
+                        this.core.sendMessage(s, input);
+                    }
+                    catch (Exception e){
+                        this.printLog("Could not send message!", e.getMessage());
+                    }
+                    
+                }
+                break;
+            case 1:
+                /*
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int open = chooser.showDialog(this, "Open folder");
+                if(open == chooser.APPROVE_OPTION){
+                    this.folder = chooser.getSelectedFile().toString()+"\\";
+                    System.out.println(this.folder);
+                } else {
+                    this.folder = "D:\\";
+                }*/
+                this.child = new SendFileUI(s);
+                break;
+            default:
+                break;
+        }
+    }//GEN-LAST:event_userTableMouseClicked
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void HasSoundCheckBoxMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_HasSoundCheckBoxMousePressed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_HasSoundCheckBoxMousePressed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        this.closeConnection(true);
+        
+        
+    }//GEN-LAST:event_formWindowClosing
+
+    private void ClearLogMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ClearLogMousePressed
+        // TODO add your handling code here:
+        this.EventLog.selectAll();
+        this.EventLog.replaceSelection("");
+        if (this.has_sound) _player.play_sound();
+    }//GEN-LAST:event_ClearLogMousePressed
+
+    private void HasTimeCheckBoxMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_HasTimeCheckBoxMousePressed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_HasTimeCheckBoxMousePressed
+
+    private void HasDateCheckBoxMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_HasDateCheckBoxMousePressed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_HasDateCheckBoxMousePressed
+
+    private void jMenuItem1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem1MousePressed
+        // TODO add your handling code here:
+        String input = JOptionPane.showInputDialog(this,"Enter your message to ALL", "User Input", JOptionPane.INFORMATION_MESSAGE);
+        if (input == null)
+            return;
+        else{
+            //send msg via dos
+            if (input.isBlank()){
+                this.printLog("Could not send message", "Empty message");
+                return;
+            }
+            try{
+                this.core.sendMessageAll(input);
+            }
+            catch (Exception e){
+                this.printLog("Could not send message!", e.getMessage());
+            }
+
+        }
+    }//GEN-LAST:event_jMenuItem1MousePressed
+
+    private void HasTimeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HasTimeCheckBoxActionPerformed
+        // TODO add your handling code here:
+        if (HasTimeCheckBox.isSelected())
+            has_time = true;
+        else
+            has_time = false;
+        if (has_sound) _player.play_sound();
+    }//GEN-LAST:event_HasTimeCheckBoxActionPerformed
+
+    private void HasDateCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_HasDateCheckBoxActionPerformed
+        // TODO add your handling code here:
+        if (HasDateCheckBox.isSelected())
+            has_date = true;
+        else
+            has_date = false;
+        if (has_sound) _player.play_sound();
+    }//GEN-LAST:event_HasDateCheckBoxActionPerformed
+
+    
     /**
      * @param args the command line arguments
      */
@@ -226,21 +475,21 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextPane EventLog;
-    private javax.swing.JTextPane OnlineList;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
+    private javax.swing.JMenuItem ClearLog;
+    private javax.swing.JTextArea EventLog;
+    private javax.swing.JCheckBoxMenuItem HasDateCheckBox;
+    private javax.swing.JCheckBoxMenuItem HasSoundCheckBox;
+    private javax.swing.JCheckBoxMenuItem HasTimeCheckBox;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTable userTable;
     // End of variables declaration//GEN-END:variables
 }

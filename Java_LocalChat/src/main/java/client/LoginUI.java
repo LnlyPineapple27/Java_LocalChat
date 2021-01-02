@@ -12,7 +12,7 @@ package client;
 import javax.swing.JOptionPane;
 
 public class LoginUI extends javax.swing.JFrame {
-
+    private MainMenu menu;
     /**
      * Creates new form LoginUI
      */
@@ -33,11 +33,9 @@ public class LoginUI extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         UsernameField = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         PortField = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        PasswordField = new javax.swing.JPasswordField();
         jLabel4 = new javax.swing.JLabel();
         IpField = new javax.swing.JTextField();
 
@@ -56,6 +54,12 @@ public class LoginUI extends javax.swing.JFrame {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 9);
         jPanel1.add(jLabel1, gridBagConstraints);
+
+        UsernameField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                UsernameFieldKeyPressed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -63,16 +67,6 @@ public class LoginUI extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 9.0;
         jPanel1.add(UsernameField, gridBagConstraints);
-
-        jLabel2.setText("Password");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 9);
-        jPanel1.add(jLabel2, gridBagConstraints);
 
         jLabel3.setText("Port");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -85,6 +79,11 @@ public class LoginUI extends javax.swing.JFrame {
         jPanel1.add(jLabel3, gridBagConstraints);
 
         PortField.setText("1881");
+        PortField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                PortFieldKeyPressed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
@@ -115,20 +114,7 @@ public class LoginUI extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
         jPanel1.add(jButton1, gridBagConstraints);
 
-        PasswordField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                PasswordFieldActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 9.0;
-        jPanel1.add(PasswordField, gridBagConstraints);
-
-        jLabel4.setText("Host IP");
+        jLabel4.setText("Host");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -138,7 +124,13 @@ public class LoginUI extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 9);
         jPanel1.add(jLabel4, gridBagConstraints);
 
-        IpField.setText("127.0.0.1");
+        IpField.setText("localhost");
+        //127.0.0.1
+        IpField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                IpFieldKeyPressed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
@@ -170,17 +162,40 @@ public class LoginUI extends javax.swing.JFrame {
         startConnection();
     }//GEN-LAST:event_jButton1MousePressed
 
-    private void PasswordFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PasswordFieldActionPerformed
+    private void UsernameFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_UsernameFieldKeyPressed
         // TODO add your handling code here:
-    }//GEN-LAST:event_PasswordFieldActionPerformed
+        char c = evt.getKeyChar();
+        if(Character.isLetterOrDigit(c)|| Character.isISOControl(c) || c == '_'){
+            UsernameField.setEditable(true);
+        }
+        else UsernameField.setEditable(false);
+    }//GEN-LAST:event_UsernameFieldKeyPressed
+
+    private void IpFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_IpFieldKeyPressed
+        // TODO add your handling code here:
+        char c = evt.getKeyChar();
+        if(Character.isLetterOrDigit(c)|| Character.isISOControl(c)){
+            IpField.setEditable(true);
+        }
+        else IpField.setEditable(false);
+    }//GEN-LAST:event_IpFieldKeyPressed
+
+    private void PortFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_PortFieldKeyPressed
+        // TODO add your handling code here:
+        char c = evt.getKeyChar();
+        if(Character.isLetterOrDigit(c)|| Character.isISOControl(c)){
+            PortField.setEditable(true);
+        }
+        else PortField.setEditable(false);
+    }//GEN-LAST:event_PortFieldKeyPressed
     private void startConnection(){
         String _name = UsernameField.getText().trim(), 
-                _pass = (new String(PasswordField.getPassword())).trim(),
+                //_pass = (new String(PasswordField.getPassword())).trim(),
                 _ip = IpField.getText().trim(),
                 _port = PortField.getText().trim();
         
-        if (_name.length() > 0 && _pass.length() > 0 && _ip.length() > 0 && _port.length() > 0){
-            MainMenu menu = new MainMenu();
+        if (_name.length() > 0 && _ip.length() > 0 && _port.length() > 0){
+            this.menu = new MainMenu(this);
             int port;
             try {
                 port = Integer.parseInt(_port);
@@ -189,9 +204,16 @@ public class LoginUI extends javax.swing.JFrame {
                JOptionPane.showMessageDialog(this, "Port should only be numbers", "Invalid input", JOptionPane.ERROR_MESSAGE);
                return;
             }
-            if(menu.startConnection(_name, _pass, _ip, port)){
-                this.setVisible(false);
+            try {
+                this.menu.startConnection(_name, _ip, port);
             }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(this, "Please check your 'host ip' or 'port'\n" + e.getMessage(), "CONNECTION FAILED", JOptionPane.ERROR_MESSAGE);
+                System.out.println(e.getMessage());
+            }
+            if (this.menu.getConnectionStatus())
+                this.setVisible(false);
+           
         }
         else{
             JOptionPane.showMessageDialog(this, "Please fill in all empty form", "Invalid input", JOptionPane.ERROR_MESSAGE);
@@ -234,12 +256,10 @@ public class LoginUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField IpField;
-    private javax.swing.JPasswordField PasswordField;
     private javax.swing.JTextField PortField;
     private javax.swing.JTextField UsernameField;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;

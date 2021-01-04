@@ -25,7 +25,8 @@ public class ClientCore implements Runnable{
     //StringTokenizer tokens = null;
     private MainMenu _main = null;
     String default_download_folder = "/download/";
-    
+    private ClientReceiver Filereceiver = null;
+    private ClientSender FileSender = null;
     boolean getStatus(){
         return this.is_active;
     }
@@ -184,7 +185,8 @@ public class ClientCore implements Runnable{
                                     DataOutputStream Out = new DataOutputStream(_share.getOutputStream());
                                     Out.writeUTF("SHARING_OPENED`"+ this._name);
                                     /*  Run Thread for this   */
-                                    new Thread(new ReceivingFileThread(fSoc, main)).start();
+                                    this.Filereceiver = new ClientReceiver(_share, this._main);
+                                    //new Thread(new ReceivingFileThread(fSoc, main)).start();
                                 } catch (IOException e) {
                                     System.out.println("[CMD_FILE_XD]: "+e.getMessage());
                                 }

@@ -5,10 +5,27 @@
  */
 package client;
 
+import java.net.Socket;
+
 /**
  *
  * @author admin
  */
-public class ClientReceiver {
+public class ClientReceiver implements Runnable{
     
+    private Thread runner;
+    @Override
+    public void run() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    ClientReceiver(Socket soc, String name){
+        
+    }
+    
+    void start() {
+        if (this.runner == null){
+            this.runner = new Thread(this);
+            this.runner.start();
+        }
+    }
 }

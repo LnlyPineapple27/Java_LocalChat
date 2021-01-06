@@ -5,35 +5,69 @@
  */
 package client;
 
+import java.net.Socket;
 import javax.swing.JFileChooser;
-
+import java.io.*;
 /**
  *
  * @author admin
  */
 public class SendFileUI extends javax.swing.JFrame {
-
+    private String host, name, receiver = "unknown";;
+    private int port;
+    private MainMenu main = null;
+    //private Socket soc = null;
+    //DataOutputStream output = null;
+    //DataInputStream input = null;
+    private SendFileThread sft = null;
     /**
      * Creates new form SendFileUI
      */
-    String receiver = "unknown";
-    public SendFileUI() {
-        initComponents();
-        this.setVisible(true);
-        ProgressBar.setVisible(false);
-        ProgressBarLabel.setVisible(false);
-        ReceiverName.setText(this.receiver);
+    //ClientSender sendSoc = null;
+    public String getHost(){
+        return this.host;
     }
-
-    public SendFileUI(String _receiver) {
+    public int getPort(){
+        return this.port;
+    }
+    public String getName(){
+        return this.name;
+    }
+    public String getReceiver(){
+        return this.receiver;
+    }
+    void enableSendButton(){
+        jButton1.setEnabled(true);
+    }
+    public SendFileUI(MainMenu _main, String _receiver) {
+        this.main = _main;
+        this.host = _main.getHost();
+        this.port = _main.getPort();
+        this.name = _main.getName();
         this.receiver = _receiver;
+        ReceiverName.setText(this.receiver);
         initComponents();
         this.setVisible(true);
-        this.setTitle("Select a file to send to " + this.receiver);
-        ProgressBar.setVisible(false);
-        ProgressBarLabel.setVisible(false);
+        //ProgressBar.setVisible(false);
+       // ProgressBarLabel.setVisible(false);
         ReceiverName.setText(this.receiver);
     }
+    /*
+    public boolean send(){
+        try{
+            this.soc = new Socket(this.host, this.port);
+            this.output = new DataOutputStream(this.soc.getOutputStream());
+            //Tell request server to send file
+            this.output.writeUTF("REQUEST_SENDFILE " + this.name);
+            this.sft = new SendFileThread(this);
+        }
+        catch(IOException e){
+            this.main.printLog("IOException", e.getMessage());
+            return false;
+        }
+        return true;
+    }*/
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -49,12 +83,10 @@ public class SendFileUI extends javax.swing.JFrame {
         jToggleButton1 = new javax.swing.JToggleButton();
         ReceiverName = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        ProgressBar = new javax.swing.JProgressBar();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        ProgressBarLabel = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         java.awt.GridBagLayout jPanel1Layout = new java.awt.GridBagLayout();
         jPanel1Layout.columnWidths = new int[] {0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0};
@@ -97,19 +129,17 @@ public class SendFileUI extends javax.swing.JFrame {
         jButton1.setBackground(new java.awt.Color(51, 255, 51));
         jButton1.setText("Send");
         jButton1.setOpaque(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 18;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(3, 1, 3, 0);
         jPanel1.add(jButton1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 9, 3, 9);
-        jPanel1.add(ProgressBar, gridBagConstraints);
 
         jLabel1.setText("Selected file:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -126,14 +156,6 @@ public class SendFileUI extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(3, 9, 3, 9);
         jPanel1.add(jLabel2, gridBagConstraints);
-
-        ProgressBarLabel.setText("Progress:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(3, 9, 3, 9);
-        jPanel1.add(ProgressBarLabel, gridBagConstraints);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -155,10 +177,27 @@ public class SendFileUI extends javax.swing.JFrame {
         int intval = chooser.showOpenDialog(this);
         if(intval == chooser.APPROVE_OPTION){
             FilePath.setText(chooser.getSelectedFile().toString());
+            FilePath.setEditable(false);
         }else{
             FilePath.setText("");
         }
     }//GEN-LAST:event_jToggleButton1ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        // this.sendSoc = new ClientSender()
+        String path = FilePath.getText();
+        if (!path.equals("")){
+            this.sft = new SendFileThread(this, path);
+            try{
+                this.sft.connect();
+            }
+            catch(Exception e){
+                this.main.printLog("Send file Error", "Please try again later\n" +  e.getMessage());
+                this.dispose();
+            }
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -190,15 +229,13 @@ public class SendFileUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new SendFileUI().setVisible(true);
+                new SendFileUI(null, "").setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField FilePath;
-    private javax.swing.JProgressBar ProgressBar;
-    private javax.swing.JLabel ProgressBarLabel;
     private javax.swing.JTextField ReceiverName;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

@@ -24,7 +24,6 @@ public class ClientCore implements Runnable{
     DataInputStream input = null;
     //StringTokenizer tokens = null;
     private MainMenu _main = null;
-    String default_download_folder = "/download/";
     private ClientReceiver Filereceiver = null;
     private ClientSender FileSender = null;
     boolean getStatus(){
@@ -110,14 +109,8 @@ public class ClientCore implements Runnable{
     public void run() {
         while (this.is_active){
             try {
-
                 String msg = input.readUTF();
-                //System.out.println("FUCK "+ msg);
-                //this.tokens = new StringTokenizer(msg);
                 ArrayList<String> tokens = new ArrayList<>(Arrays.asList(msg.split("`")));
-                //String[] a = msg.split(" ");
-                //tokens = Arrays.asList(a);
-                //String[] tokens = msg.split(" ");
                 if (tokens.size()>1){
                     String order = tokens.get(0);
                     switch(order){
@@ -139,8 +132,7 @@ public class ClientCore implements Runnable{
                             String content = tokens.get(2);
                             if (tokens.size() > 2){
                                 for(int i = 3; i < tokens.size(); ++i){
-                                    content += "`";
-                                    content += tokens.get(i);
+                                    content = content + "`" + tokens.get(i);
                                 }
                             }
                             this._main.printLog(sender + "'s message to YOU", content);
@@ -150,8 +142,7 @@ public class ClientCore implements Runnable{
                             String _content = tokens.get(2);
                             if (tokens.size() > 2){
                                 for(int i = 3; i < tokens.size(); ++i){
-                                    _content += "`";
-                                    _content += tokens.get(i);
+                                    _content = _content + "`" + tokens.get(i);
                                 }
                             }
                             this._main.printLog(_sender + "'s message to ALL", _content);
@@ -172,29 +163,26 @@ public class ClientCore implements Runnable{
                                 try {
                                     if (this.output != null){
                                          try {
-                                            this.output.writeUTF("SEND_FILE_ACCEPTED`" + this._name);
-                                            this._main.printLog("Accepted file from " + Fsender, "file will be saved at '" + this.default_download_folder + "\\" + Fsender +"'");
+                                            this.output.writeUTF("RECEIVE_FILE_RESPONSE ACCEPTED " + this._name + " " + Fsender);
+                                            this._main.printLog("Accepted file from " + Fsender, "file will be saved at '" + this._main.default_download_folder + "\\" + Fsender +"'");
                                         } catch (Exception e) {
                                             this._main.printLog("STH WENT WRONG", e.getMessage());
                                         }
                                     }
                                     
-
-                                    /*  hàm này sẽ tạo một socket filesharing  để tạo một luồng xử lý file đi vào và socket này sẽ tự động đóng khi hoàn thành.  */
-                                    Socket _share = new Socket(this._main.host_ip, this._main.port);
+                                    Socket _share = new Socket(this._ip, this._port);
                                     DataOutputStream Out = new DataOutputStream(_share.getOutputStream());
-                                    Out.writeUTF("SHARING_OPENED`"+ this._name);
-                                    /*  Run Thread for this   */
+                                    Out.writeUTF("RECEIVING_OPENED "+ this._name);
                                     this.Filereceiver = new ClientReceiver(_share, this._main);
                                     //new Thread(new ReceivingFileThread(fSoc, main)).start();
                                 } catch (IOException e) {
-                                    System.out.println("[CMD_FILE_XD]: "+e.getMessage());
+                                    System.out.println("IOException: "+e.getMessage());
                                 }
                             } 
                             else { // client từ chối yêu cầu, sau đó gửi kết quả tới sender
                                 if (this.output != null){
                                     try {
-                                        this.output.writeUTF("SEND_FILE_UNACCEPTED`" + this._name);
+                                        this.output.writeUTF("RECEIVE_FILE_RESPONSE UNACCEPTED " + this._name + " " + Fsender);
                                         this._main.printLog("Refused file from " + Fsender, "...");
                                     } catch (Exception e) {
                                         this._main.printLog("STH WENT WRONG", e.getMessage());

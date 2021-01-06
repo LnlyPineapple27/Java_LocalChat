@@ -18,12 +18,15 @@ import sound.notification_sound;
  * @author admin
  */
 public class MainMenu extends javax.swing.JFrame {
+    int MAXSIZE = 100;
     String username = "unknown", host_ip = "unknown";
     int port = -1;
     private ClientCore core = null;
     private LoginUI parent;
     private boolean has_date = true;
     private boolean has_time = true;
+   // private boolean sending_file = false;
+    String default_download_folder = "/Download/";
     SendFileUI child = null;
     DateTimeFormatter _day;
     DateTimeFormatter _time;
@@ -34,6 +37,22 @@ public class MainMenu extends javax.swing.JFrame {
     /**
      * Creates new form MainMenu
      */
+    public String getName(){
+        return this.username;
+    }
+    public String getHost(){
+        return this.host_ip;
+    }
+    public int getPort(){
+        return this.port;
+    }
+    /*
+    void close_sending_file(){
+        this.sending_file = false;
+    }
+    void open_sending_file(){
+        this.sending_file = true;
+    }*/
     public MainMenu(LoginUI ui) {
         this.parent = ui;
         _day = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
@@ -74,12 +93,7 @@ public class MainMenu extends javax.swing.JFrame {
         catch (Exception e){
             throw e;
         }
-        //this.printLog("CC", "dhkj");
         this.setVisible(true);
-        /*Set<String> list = new HashSet<String>();
-        list.add("datpt");
-        list.add("datpt2");
-        updateOnlineList(list);*/
 
     }
     public void closeConnection(boolean is_quit){
@@ -349,17 +363,16 @@ public class MainMenu extends javax.swing.JFrame {
                 }
                 break;
             case 1:
-                /*
-                JFileChooser chooser = new JFileChooser();
-                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int open = chooser.showDialog(this, "Open folder");
-                if(open == chooser.APPROVE_OPTION){
-                    this.folder = chooser.getSelectedFile().toString()+"\\";
-                    System.out.println(this.folder);
-                } else {
-                    this.folder = "D:\\";
-                }*/
-                this.child = new SendFileUI(s);
+                //if(this.sending_file == false){
+                    //this.child = 
+                    new SendFileUI(this, s);
+                    /*if (this.child.send_to(s)){
+                        this.open_sending_file();
+                    }
+                    else JOptionPane.showMessageDialog(this, "A file is being sent right now!\n Please wait", "SYSTEM BUSY", JOptionPane.ERROR_MESSAGE);       
+                    */
+                //}
+                //else JOptionPane.showMessageDialog(this, "A file is being sent right now!\n Please wait", "SYSTEM BUSY", JOptionPane.ERROR_MESSAGE);
                 break;
             default:
                 break;
@@ -377,9 +390,7 @@ public class MainMenu extends javax.swing.JFrame {
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
-        this.closeConnection(true);
-        
-        
+        this.closeConnection(true);     
     }//GEN-LAST:event_formWindowClosing
 
     private void ClearLogMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ClearLogMousePressed

@@ -26,7 +26,7 @@ public class MainMenu extends javax.swing.JFrame {
     private boolean has_date = true;
     private boolean has_time = true;
    // private boolean sending_file = false;
-    String default_download_folder = "/Download/";
+    String default_download_folder = "D:\\Local_chat\\Download";
     SendFileUI child = null;
     DateTimeFormatter _day;
     DateTimeFormatter _time;
@@ -313,9 +313,7 @@ public class MainMenu extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 912, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 912, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

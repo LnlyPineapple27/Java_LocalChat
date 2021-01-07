@@ -199,6 +199,7 @@ public class ServerCore implements Runnable{
             this.control_ui = ui;
             this.is_active = true;
             this.sharing_client = new TreeMap<String, Socket>();
+            this.receiving_client = new TreeMap<String, Socket>();
             this.user_list = new TreeMap<String, Socket>();
             this.core = new ServerSocket(this.port);
             //this.sharing_client_name = new Vector();

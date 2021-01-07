@@ -51,9 +51,8 @@ public class ClientSender implements Runnable{
             int filesize = (int)Math.ceil(len / BUFFER_SIZE);
             String clean_filename = filename.getName();
             output.writeUTF("SENDING_FILE "  + this.sender + " " + this.receiver + " " + clean_filename.replace(" ", "_") +" "+ filesize);
-            //System.out.println("Từ: "+ sender);
-            //System.out.println("Đến: "+ receiver);
-            /** Create an stream **/
+            
+            
             OutputStream file_writer = this.soc.getOutputStream();
             // Read file
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(filename));
@@ -73,7 +72,7 @@ public class ClientSender implements Runnable{
                 
             //form.updateAttachment(false); //  Cập nhật Attachment 
             JOptionPane.showMessageDialog(this.main, "File was sent", "Completed", JOptionPane.INFORMATION_MESSAGE);
-            this.main.dispose();
+            //this.main.dispose();
             output.flush();
             output.close();
             System.out.println("File đã được gửi..!");

@@ -39,14 +39,17 @@ public class SendFileUI extends javax.swing.JFrame {
     void enableSendButton(){
         jButton1.setEnabled(true);
     }
+    void printMsg(String type, String msg){
+        this.main.printLog(type, msg);
+    }
     public SendFileUI(MainMenu _main, String _receiver) {
         this.main = _main;
         this.host = _main.getHost();
         this.port = _main.getPort();
         this.name = _main.getName();
         this.receiver = _receiver;
-        ReceiverName.setText(this.receiver);
         initComponents();
+        this.setTitle("Sending file to " + this.receiver);
         this.setVisible(true);
         //ProgressBar.setVisible(false);
        // ProgressBarLabel.setVisible(false);
@@ -93,8 +96,6 @@ public class SendFileUI extends javax.swing.JFrame {
         jPanel1Layout.rowHeights = new int[] {0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0};
         jPanel1Layout.columnWeights = new double[] {100.0};
         jPanel1.setLayout(jPanel1Layout);
-
-        FilePath.setText("File path");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
@@ -188,6 +189,7 @@ public class SendFileUI extends javax.swing.JFrame {
         // this.sendSoc = new ClientSender()
         String path = FilePath.getText();
         if (!path.equals("")){
+            this.printMsg("Sending", path + " to " + this.receiver);
             this.sft = new SendFileThread(this, path);
             try{
                 this.sft.connect();

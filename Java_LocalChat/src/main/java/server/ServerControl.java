@@ -10,7 +10,7 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 import sound.notification_sound;
 import java.time.format.DateTimeFormatter;  
-import java.time.LocalDateTime;    
+import java.time.LocalDateTime;
 /**
  *
  * @author admin
@@ -136,7 +136,8 @@ public class ServerControl extends javax.swing.JFrame {
         OptionTab.add(jPanel3, java.awt.BorderLayout.LINE_END);
 
         try{
-            LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/hcmus_logo.png"))); // NOI18N
+            //javax.swing.ImageIcon icon = new javax.swing.ImageIcon("hcmus_logo.png");
+            LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/server/hcmus_logo.png"))); // NOI18N
         }
         catch(Exception e){
             LogoLabel.setText("Logo image is inaccessible!");
@@ -280,7 +281,7 @@ public class ServerControl extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(TabsTree, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 765, Short.MAX_VALUE)
+            .addComponent(TabsTree, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 510, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

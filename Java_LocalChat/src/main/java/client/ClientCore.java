@@ -158,23 +158,22 @@ public class ClientCore implements Runnable{
                             break;
                         case "REQUEST_SEND_FILE":
                             String Fsender = tokens.get(1);
-                            int confirm = JOptionPane.showConfirmDialog(this._main, Fsender + " want to send you a file!\nAccept?", "File message request", JOptionPane.YES_NO_OPTION);
+                            int confirm = JOptionPane.showConfirmDialog(this._main,"'" + Fsender + "' want to send you a file!\nAccept?", "File message request", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION){
                                 try {
-                                    if (this.output != null){
-                                         try {
-                                            this.output.writeUTF("RECEIVE_FILE_RESPONSE ACCEPTED " + this._name + " " + Fsender);
-                                            this._main.printLog("Accepted file from " + Fsender, "file will be saved at '" + this._main.default_download_folder + "\\" + Fsender +"'");
-                                        } catch (Exception e) {
-                                            this._main.printLog("STH WENT WRONG", e.getMessage());
-                                        }
-                                    }
-                                    
                                     Socket _share = new Socket(this._ip, this._port);
                                     DataOutputStream Out = new DataOutputStream(_share.getOutputStream());
                                     Out.writeUTF("RECEIVING_OPENED "+ this._name);
                                     this.Filereceiver = new ClientReceiver(_share, this._main);
                                     //new Thread(new ReceivingFileThread(fSoc, main)).start();
+                                    if (this.output != null){
+                                         try {
+                                            this.output.writeUTF("RECEIVE_FILE_RESPONSE ACCEPTED " + this._name + " " + Fsender);
+                                            this._main.printLog("Accepted file from " + Fsender, "file will be saved at '" + this._main.default_download_folder + "\\" + Fsender +"");
+                                        } catch (Exception e) {
+                                            this._main.printLog("STH WENT WRONG", e.getMessage());
+                                        }
+                                    }
                                 } catch (IOException e) {
                                     System.out.println("IOException: "+e.getMessage());
                                 }

@@ -35,7 +35,7 @@ class SendFileThread implements Runnable{
             this.output = new DataOutputStream(this.soc.getOutputStream());
             this.input = new DataInputStream(this.soc.getInputStream());
             //Tell request server to send file
-            this.output.writeUTF("REQUEST_SENDFILE " + this.name + " " + this.receiver);
+            this.output.writeUTF("REQUEST_SEND_FILE " + this.name + " " + this.receiver);
             start();
         }
         catch(Exception e){
@@ -74,23 +74,26 @@ class SendFileThread implements Runnable{
                             if("UNACCEPTED".equals(res)){
                                 //this._main.printLog("sendfile response", "Connection unaccepted - username used");
                                 JOptionPane.showMessageDialog(this.main, "Can not send file right now!\n Please try again later", "Server refuse", JOptionPane.ERROR_MESSAGE);
+                                this.main.printMsg("Can not send file right now", "Send file canceled");  
                                 this.stop();
                                 this.main.dispose();
                             }
                             else if("NO_RECEIVER".equals(res)){
                                 JOptionPane.showMessageDialog(this.main, "Maybe receiver has disconnected!", "Receiver not found", JOptionPane.ERROR_MESSAGE);
+                                this.main.printMsg("Receiver not found", "Send file canceled");      
                                 this.stop();
                                 this.main.dispose();
                             }
                             else if("ACCEPTED".equals(res)){
                                 System.out.println("send file connection accepted");
-                                
+                                this.main.printMsg("Server connected", "Prepare to send file");
                             }
                         break;
                     case "RECEIVE_FILE_RESPONSE":
                         String res2 = tokens.get(1);
                             if("ACCEPTED".equals(res2)){
                                 try{
+                                     //Thread.sleep(2000);
                                     new ClientSender(this.soc, this.file_dir, this.name, this.receiver, this.main);
                                 }
                                 catch(Exception e){
@@ -105,34 +108,21 @@ class SendFileThread implements Runnable{
                             else if("UNACCEPTED".equals(res2)){
                                 JOptionPane.showMessageDialog(this.main, "Receiver refused to get file", "File not sent", JOptionPane.INFORMATION_MESSAGE);
                                 this.stop();
-                                this.main.dispose();
+                                //this.main.dispose();
                             }
-                    
-                    case "SEND_FILE_ERROR":
-                        String error_msg = "";
-                        for(int i = 1; i < tokens.size(); ++i){
-                            error_msg = error_msg +" "+ tokens.get(i);
-                        }                                                     
-                        System.out.println(error_msg);                            
-                        JOptionPane.showMessageDialog(this.main, error_msg,"Error", JOptionPane.ERROR_MESSAGE);
-                        this.main.enableSendButton();
-                        break;
 
-/*
-                    case "CMD_SENDFILERESPONSE":
-                        
-                        //Format: CMD_SENDFILERESPONSE [username] [Message]
-                        
-                        String rReceiver = st.nextToken();
-                        String rMsg = "";
-                        while(st.hasMoreTokens()){
-                            rMsg = rMsg+" "+st.nextToken();
-                        }
-                        form.updateAttachment(false);
-                        JOptionPane.showMessageDialog(SendFile.this, rMsg, "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        dispose();
+                    case "SEND_FILE_RESPONSE":
+                        String __msg = tokens.get(1);
+                        for(int i = 2; i < tokens.size(); ++i)
+                            __msg = __msg + "`" + tokens.get(i);
+
+                        JOptionPane.showMessageDialog(this.main, __msg, "Error on receiver side", JOptionPane.ERROR_MESSAGE);
+                        this.stop();
+                        //this.main.dispose();
                         break;
-                        */
+                    default:
+                        this.main.printMsg("Unknown order received", msg);
+                        break;
                 }
             }
         } catch (IOException e) {

@@ -172,13 +172,13 @@ public class ChildrenSocket implements Runnable {
                         
                             if (soc1 != null){
                                 try {
-                                        DataOutputStream refuse_output = new DataOutputStream(soc1.getOutputStream());
-                                        if ("ACCEPTED".equals(res))     
-                                            refuse_output.writeUTF("RECEIVE_FILE_RESPONSE`ACCEPTED");
-                                        else if("UNACCEPTED".equals(res)) {
-                                            this.parent_core.delete_sharing_client(__sender);
-                                            refuse_output.writeUTF("RECEIVE_FILE_RESPONSE`UNACCEPTED");
-                                        }
+                                    DataOutputStream refuse_output = new DataOutputStream(soc1.getOutputStream());
+                                    if ("ACCEPTED".equals(res))     
+                                        refuse_output.writeUTF("RECEIVE_FILE_RESPONSE`ACCEPTED");
+                                    else if("UNACCEPTED".equals(res)) {
+                                        //this.parent_core.delete_sharing_client(__sender);
+                                        refuse_output.writeUTF("RECEIVE_FILE_RESPONSE`UNACCEPTED");
+                                    }
                                 } catch (IOException e) {
                                     this.parent_core.pass_msg("IOException", "Could not pass message to sender: " + __sender);
                                 }
@@ -187,38 +187,25 @@ public class ChildrenSocket implements Runnable {
                         break;
                     case "RECEIVING_OPENED":
                         this.file_receiver = tokens.nextToken();
-                        if (this.parent_core.append_receiving_client(this.name, this.soc)){
+                        this.parent_core.pass_msg("RECEIVING_OPENED", file_receiver + " is waiting for file");
+                        
+                        if (this.parent_core.append_receiving_client(this.file_receiver, this.soc)){
                             System.out.println("New file_receiver added: " + this.name);
                             this.parent_core.pass_msg(this.file_receiver, "is waiting for file to send");
                         }
                         break;
-                    default:
-                        this.parent_core.pass_msg("Unknown order received", message);
-                        break;
                     case "SENDING_FILE":
-                        //main.appendMessage("CMD_SENDFILE : Client đang gửi một file...");
-                        /*
-                         Format: CMD_SENDFILE [Filename] [Size] [Recipient] [Consignee]  from: Sender Format
-                         Format: CMD_SENDFILE [Filename] [Size] [Consignee] to Receiver Format
-                         */
-                        
                         String sender3 = tokens.nextToken();
                         String receiver3 = tokens.nextToken();
                         String file_name3 = tokens.nextToken();
                         String filesize3 = tokens.nextToken();
-                        //main.appendMessage("CMD_SENDFILE : Từ: " + consignee);
-                        //main.appendMessage("CMD_SENDFILE : Đến: " + sendto);
                         this.parent_core.pass_msg("Sending file", "From " + sender3);
                         this.parent_core.pass_msg("Sending file", "To " + receiver3);
-                        /**
-                         * Nhận client Socket *
-                         */
-                        //main.appendMessage("CMD_SENDFILE : sẵn sàng cho các kết nối..");
-                        Socket filesock = this.parent_core.get_receiving_client(receiver3); /* Consignee Socket  */
-                        /*   Now Check if the consignee socket was exists.   */
-
-                        if (filesock != null) { /* Exists   */
-
+                        this.parent_core.pass_msg("File name", file_name3);
+                        this.parent_core.pass_msg("File size", filesize3);
+                        
+                        Socket filesock = this.parent_core.get_receiving_client(receiver3);
+                        if (filesock != null) {
                             try {
                                 DataOutputStream file_writer = new DataOutputStream(filesock.getOutputStream());
                                 file_writer.writeUTF("SENDING_FILE`" + file_name3 + "`" + filesize3 + "`" + sender3);
@@ -242,29 +229,49 @@ public class ChildrenSocket implements Runnable {
                             this.parent_core.delete_sharing_client(sender3);
                             this.parent_core.pass_msg("Send file exception", "Client '" + receiver3 + "' not found");
                             DataOutputStream dos = new DataOutputStream(this.soc.getOutputStream());
-                            dos.writeUTF("SEND_FILE_ERROR " + "Client '" + receiver3 + "' not found");
+                            dos.writeUTF("SEND_FILE_ERROR`" + "Client '" + receiver3 + "' not found");
                         }
+                        break;
+                    case "SEND_FILE_RESPONSE":
+                        // Pass feedback to file sender
+                        String ___receiver = tokens.nextToken(); // phương thức nhận receiver username
+                        String ___msg = ""; // phương thức nhận error message
+                        this.parent_core.pass_msg("SEND_FILE_RESPONSE", "-" + ___receiver);
+                        while (tokens.hasMoreTokens()) {
+                            ___msg = ___msg + " " + tokens.nextToken();
+                        }
+                        try {
+                            Socket ___soc = (Socket) this.parent_core.get_sharing_client(___receiver);
+                            DataOutputStream ___dos = new DataOutputStream(___soc.getOutputStream());
+                            ___dos.writeUTF("SEND_FILE_RESPONSE" + "`" + ___msg);
+                        } catch (IOException e) {
+                            this.parent_core.pass_msg("SEND_FILE_RESPONSE", e.getMessage());
+                        }
+                        break;
+                    
+                    default:
+                        this.parent_core.pass_msg("Unknown order received", message);
                         break;
                 }
             }
         }
         catch(Exception e){
-            this.parent_core.pass_msg(this.name + "-ChildrenSocket", e.getMessage()+ " - Cause: " + e.getCause());
             if (this.name!=null){
+                this.parent_core.pass_msg(this.name + "-ChildrenSocket", e.getMessage()+ " - Cause: " + e.getCause());
                 if (this.parent_core.deleteUser(this.name))
                     System.out.println("User-" + this.name + " was removed from this server!");
                 else System.out.println("{Error]: User-" + this.name + " doesn't exist in server! Maybe sth went wrong :<");
             }
-            else if(this.file_sender != null){
+            if(this.file_sender != null){
                 if(this.parent_core.delete_sharing_client(this.file_sender))
                     System.out.println("File sender: " + this.file_sender + " removed");
                 else System.out.println("File sender: " + this.file_sender + " couldnt be removed");
             }
-            else if(this.file_receiver != null){
+            /*if(this.file_receiver != null){
                  if(this.parent_core.delete_receiving_client(this.file_receiver))
                     System.out.println("File receiver: " + this.file_receiver + " removed");
                 else System.out.println("File receiver: " + this.file_receiver + " couldnt be removed");
-            }
+            }*/
             else System.out.println(e.getMessage());
             
         }

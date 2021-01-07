@@ -10,6 +10,7 @@ import java.io.*;
 import java.util.*;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitorInputStream;
+import java.nio.file.*;
 /**
  *
  * @author admin
@@ -29,6 +30,7 @@ public class ClientReceiver implements Runnable{
         try{
             this._input = new DataInputStream(this.soc.getInputStream());
             this._output = new DataOutputStream(this.soc.getOutputStream());
+            this.start();
         }
         catch(Exception e){
             _main.printLog("Receiving file error", e.getMessage());
@@ -53,8 +55,9 @@ public class ClientReceiver implements Runnable{
                     String order = tokens.get(0);
                     if (order.equals("SENDING_FILE")){
                         String file_name = tokens.get(1);
+                        int file_size = -1;
                         try{
-                            int size = Integer.parseInt(tokens.get(2));
+                            file_size = Integer.parseInt(tokens.get(2));
                         }
                         catch(NumberFormatException e1){
                             System.out.println("Unexpected signal received: " + msg);
@@ -64,17 +67,27 @@ public class ClientReceiver implements Runnable{
                         for(int i = 4; i <tokens.size(); ++i){
                             this.sender_name = this.sender_name + "`" + tokens.get(i);
                         }
-
-                        String dir = this._main.default_download_folder + this.sender_name + "/" + file_name;
+                        
+                        this._main.printLog("Receiving file", "From " + sender_name);
+                        this._main.printLog("File name", file_name);
+                        this._main.printLog("File size", Integer.toString(file_size));
+                        
+                        String dir = this._main.default_download_folder +"\\"+ this.sender_name + "\\" + file_name;
                         this._main.printLog("Downloading","Saving file to " + dir);
-
+                          try {
+                            Path path = Paths.get(this._main.default_download_folder + "\\" + this.sender_name);
+                            Files.createDirectories(path);
+                            this._main.printLog("Directory is created", this._main.default_download_folder + "\\" + this.sender_name);
+                          } catch (IOException e) {
+                              this._main.printLog("Exception occur whe creating directory",  this._main.default_download_folder + "\\" + this.sender_name);             
+                          }
                         InputStream in = this.soc.getInputStream();
                         FileOutputStream file = new FileOutputStream(dir);
 
                         ProgressMonitorInputStream notification = new ProgressMonitorInputStream(this._main, "Your file is being downloaded", in);
                         BufferedInputStream buf = new BufferedInputStream(notification);
                         byte[] b = new byte[this._main.MAXSIZE];
-                        int count, loaded = 0;
+                        int count;
                         while(true){
                             count = buf.read(b);
                             if (count == -1) break;

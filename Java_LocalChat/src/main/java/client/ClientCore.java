@@ -8,11 +8,12 @@ package client;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 public class ClientCore implements Runnable{
     private String _name, _ip;
@@ -84,10 +85,6 @@ public class ClientCore implements Runnable{
             this.terminate(is_quit);
             if (this.soc != null)
                 this.soc.close();
-            //if(this.runner != null)
-            //    this.runner.join();
-            //this.user_list.clear();
-            //this.control_ui.updateOnlineList(this.get_user_list());
         } 
         catch (Exception e) {
             throw e;
@@ -148,8 +145,6 @@ public class ClientCore implements Runnable{
                             this._main.printLog(_sender + "'s message to ALL", _content);
                             break;
                         case "USER_LIST":
-                            //String[]names = tokens.get(1).split(",");
-                            //Set<String> list = new HashSet<String>(Arrays.asList(names));
                             Set<String> list = new HashSet<String>();
                             for(int i = 1; i < tokens.size(); ++i){
                                 list.add(tokens.get(i));
@@ -164,12 +159,22 @@ public class ClientCore implements Runnable{
                                     Socket _share = new Socket(this._ip, this._port);
                                     DataOutputStream Out = new DataOutputStream(_share.getOutputStream());
                                     Out.writeUTF("RECEIVING_OPENED "+ this._name);
-                                    this.Filereceiver = new ClientReceiver(_share, this._main);
-                                    //new Thread(new ReceivingFileThread(fSoc, main)).start();
+                                    
+                                    // Pick a place to save file
+                                    String folder;
+                                    JFileChooser chooser = new JFileChooser();
+                                    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                                    int open = chooser.showDialog(this._main, "Set location to save file");
+                                    if(open == chooser.APPROVE_OPTION)
+                                        folder = chooser.getSelectedFile().toString();
+                                    else 
+                                        folder = null;
+                                    
+                                    this.Filereceiver = new ClientReceiver(_share, this._main, folder);
                                     if (this.output != null){
                                          try {
                                             this.output.writeUTF("RECEIVE_FILE_RESPONSE ACCEPTED " + this._name + " " + Fsender);
-                                            this._main.printLog("Accepted file from " + Fsender, "file will be saved at '" + this._main.default_download_folder + "\\" + Fsender +"");
+                                            this._main.printLog("Accepting file from " + Fsender, " please wait for the download process to complete!");
                                         } catch (Exception e) {
                                             this._main.printLog("STH WENT WRONG", e.getMessage());
                                         }
@@ -178,7 +183,7 @@ public class ClientCore implements Runnable{
                                     System.out.println("IOException: "+e.getMessage());
                                 }
                             } 
-                            else { // client từ chối yêu cầu, sau đó gửi kết quả tới sender
+                            else {
                                 if (this.output != null){
                                     try {
                                         this.output.writeUTF("RECEIVE_FILE_RESPONSE UNACCEPTED " + this._name + " " + Fsender);
@@ -207,7 +212,6 @@ public class ClientCore implements Runnable{
                 System.out.println(e.getMessage());
             }
             catch(IOException e){
-                //JOptionPane.showMessageDialog(null, "Connection interupted", "SERVER_NOT_RESPONSE", JOptionPane.WARNING_MESSAGE);
                 this._main.printLog("Connection interupted", "");
                 this._main.printLog("Closing connection", "...");
                 System.out.println(e.getMessage());

@@ -72,7 +72,7 @@ public class ClientSender implements Runnable{
                 
             //form.updateAttachment(false); //  Cập nhật Attachment 
             JOptionPane.showMessageDialog(this.main, "File was sent", "Completed", JOptionPane.INFORMATION_MESSAGE);
-            //this.main.dispose();
+            this.main.printMsg("File was sent", "Completed");
             output.flush();
             output.close();
             System.out.println("File đã được gửi..!");

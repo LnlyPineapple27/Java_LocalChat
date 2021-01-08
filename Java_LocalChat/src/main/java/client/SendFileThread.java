@@ -116,9 +116,8 @@ class SendFileThread implements Runnable{
                         for(int i = 2; i < tokens.size(); ++i)
                             __msg = __msg + "`" + tokens.get(i);
 
-                        JOptionPane.showMessageDialog(this.main, __msg, "Error on receiver side", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this.main, __msg, "Send file connection closed", JOptionPane.INFORMATION_MESSAGE);
                         this.stop();
-                        //this.main.dispose();
                         break;
                     default:
                         this.main.printMsg("Unknown order received", msg);

@@ -13,7 +13,7 @@ import javax.swing.ProgressMonitorInputStream;
 import java.nio.file.*;
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 public class ClientReceiver implements Runnable{
     private DataInputStream _input = null;
@@ -23,10 +23,15 @@ public class ClientReceiver implements Runnable{
     private Thread runner;
     private boolean is_active = false;
     private String sender_name = null;
-    ClientReceiver(Socket share_socket, MainMenu main){
+    private String download_folder = ""; 
+    ClientReceiver(Socket share_socket, MainMenu main, String folder){
         this._main = main;
         this.soc = share_socket;
         this.is_active = true;
+        if (folder == null)
+            this.download_folder = this._main.default_download_folder;
+        else 
+            this.download_folder = folder;
         try{
             this._input = new DataInputStream(this.soc.getInputStream());
             this._output = new DataOutputStream(this.soc.getOutputStream());
@@ -72,14 +77,14 @@ public class ClientReceiver implements Runnable{
                         this._main.printLog("File name", file_name);
                         this._main.printLog("File size", Integer.toString(file_size));
                         
-                        String dir = this._main.default_download_folder +"\\"+ this.sender_name + "\\" + file_name;
+                        String dir = this.download_folder +"\\"+ this.sender_name + "\\" + file_name;
                         this._main.printLog("Downloading","Saving file to " + dir);
                           try {
-                            Path path = Paths.get(this._main.default_download_folder + "\\" + this.sender_name);
+                            Path path = Paths.get(this.download_folder + "\\" + this.sender_name);
                             Files.createDirectories(path);
-                            this._main.printLog("Directory is created", this._main.default_download_folder + "\\" + this.sender_name);
+                            this._main.printLog("Directory is created", this.download_folder + "\\" + this.sender_name);
                           } catch (IOException e) {
-                              this._main.printLog("Exception occur whe creating directory",  this._main.default_download_folder + "\\" + this.sender_name);             
+                              this._main.printLog("Exception occur whe creating directory",  this.download_folder + "\\" + this.sender_name);             
                           }
                         InputStream in = this.soc.getInputStream();
                         FileOutputStream file = new FileOutputStream(dir);
@@ -98,7 +103,7 @@ public class ClientReceiver implements Runnable{
                         this.stop();
                         JOptionPane.showMessageDialog(this._main, "File downloaded and saved at\n" + dir );
                         System.out.println("Download completed!");
-                       
+                       this._main.printLog("Download completed", "File downloaded and saved at\n" + dir);
                     }
                     
                 }

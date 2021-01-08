@@ -267,11 +267,11 @@ public class ChildrenSocket implements Runnable {
                     System.out.println("File sender: " + this.file_sender + " removed");
                 else System.out.println("File sender: " + this.file_sender + " couldnt be removed");
             }
-            /*if(this.file_receiver != null){
+            if(this.file_receiver != null){
                  if(this.parent_core.delete_receiving_client(this.file_receiver))
                     System.out.println("File receiver: " + this.file_receiver + " removed");
                 else System.out.println("File receiver: " + this.file_receiver + " couldnt be removed");
-            }*/
+            }
             else System.out.println(e.getMessage());
             
         }

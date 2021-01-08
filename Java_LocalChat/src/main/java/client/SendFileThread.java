@@ -10,7 +10,7 @@ import java.util.*;
 import javax.swing.JOptionPane;
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 class SendFileThread implements Runnable{
     private SendFileUI main = null;
@@ -64,10 +64,7 @@ class SendFileThread implements Runnable{
             while(!Thread.currentThread().isInterrupted()){
                 String msg = input.readUTF();
                 ArrayList<String> tokens = new ArrayList<>(Arrays.asList(msg.split("`")));
-                
-                //String data = this.main.input.readUTF();  // Đọc nội dung của dữ liệu được nhận từ Server
-                //st = new StringTokenizer(data);
-                String order = tokens.get(0);  //  Lấy chữ đầu tiên từ dữ liệu
+                String order = tokens.get(0);  
                 switch(order){
                     case "SEND_REQUEST_FEEDBACK":
                         String res = tokens.get(1);

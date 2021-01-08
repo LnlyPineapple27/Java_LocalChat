@@ -10,7 +10,7 @@ import java.io.*;
 import javax.swing.JOptionPane;
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 public class ClientSender implements Runnable{
     private DataOutputStream output = null;
@@ -43,10 +43,6 @@ public class ClientSender implements Runnable{
             output = new DataOutputStream(this.soc.getOutputStream());
             /** Write filename, recipient, username  **/
             File filename = new File(this.dir);
-            /*File parentDir = filename.getParentFile();
-            if(! parentDir.exists())
-                parentDir.mkdirs();
-            */
             int len = (int) filename.length();
             int filesize = (int)Math.ceil(len / BUFFER_SIZE);
             String clean_filename = filename.getName();
@@ -54,7 +50,6 @@ public class ClientSender implements Runnable{
             
             
             OutputStream file_writer = this.soc.getOutputStream();
-            // Read file
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(filename));
 
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -65,16 +60,13 @@ public class ClientSender implements Runnable{
                
                 if((percent%10) == 0)
                     this.main.setTitle("Process: " + Integer.toString(percent));
-                output.write(buffer, 0, count);
+                file_writer.write(buffer, 0, count);
             }
-            /* Cập nhật AttachmentForm GUI */
             this.main.setTitle("Completed");
-                
-            //form.updateAttachment(false); //  Cập nhật Attachment 
             JOptionPane.showMessageDialog(this.main, "File was sent", "Completed", JOptionPane.INFORMATION_MESSAGE);
             this.main.printMsg("File was sent", "Completed");
-            output.flush();
-            output.close();
+            file_writer.flush();
+            file_writer.close();
             System.out.println("File đã được gửi..!");
         } catch (IOException e) {
             System.out.println("[SendFile]: "+ e.getMessage());

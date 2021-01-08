@@ -10,20 +10,13 @@ import javax.swing.JFileChooser;
 import java.io.*;
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 public class SendFileUI extends javax.swing.JFrame {
     private String host, name, receiver = "unknown";;
     private int port;
     private MainMenu main = null;
-    //private Socket soc = null;
-    //DataOutputStream output = null;
-    //DataInputStream input = null;
     private SendFileThread sft = null;
-    /**
-     * Creates new form SendFileUI
-     */
-    //ClientSender sendSoc = null;
     public String getHost(){
         return this.host;
     }
@@ -55,21 +48,6 @@ public class SendFileUI extends javax.swing.JFrame {
        // ProgressBarLabel.setVisible(false);
         ReceiverName.setText(this.receiver);
     }
-    /*
-    public boolean send(){
-        try{
-            this.soc = new Socket(this.host, this.port);
-            this.output = new DataOutputStream(this.soc.getOutputStream());
-            //Tell request server to send file
-            this.output.writeUTF("REQUEST_SENDFILE " + this.name);
-            this.sft = new SendFileThread(this);
-        }
-        catch(IOException e){
-            this.main.printLog("IOException", e.getMessage());
-            return false;
-        }
-        return true;
-    }*/
     
     /**
      * This method is called from within the constructor to initialize the form.

@@ -7,7 +7,7 @@ package server;
 
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 
 import java.net.*;
@@ -20,46 +20,7 @@ public class ServerCore implements Runnable{
     private boolean is_active;
     private int port;
     private Thread runner = null;
-    //public Vector sharing_client_name = null;
-    //public Vector sharing_client_socket = null;
     private TreeMap <String, Socket> user_list, sharing_client, receiving_client;
-    /*
-    public void add_sharing_client_name(String name){
-        if(this.sharing_client_name != null)
-            this.sharing_client_name.add(name);
-    }
-    public void add_sharing_client_socket(Socket s){
-        if(this.sharing_client_socket != null)
-            this.sharing_client_socket.add(s);
-    }
-    
-    public Socket get_sharing_client_socket(String name){
-        for(int i = 0; i < this.sharing_client_name.size(); ++i){
-            if(this.sharing_client_name.elementAt(i).equals(name)){
-                return (Socket) this.sharing_client_socket.elementAt(i);
-            }
-        }
-        return null;
-    }
-    public void remove_sharing_client(String name){
-        for(int i = 0; i < this.sharing_client_name.size(); ++i){
-            if(this.sharing_client_name.elementAt(i).equals(name)){
-                try {
-                    Socket remove_soc = get_sharing_client_socket(name);
-                    if(remove_soc != null)
-                        remove_soc.close();
-                    
-                    System.out.println("Removing sharer " + name);
-                    this.sharing_client_socket.removeElementAt(i);
-                    this.sharing_client_name.removeElementAt(i);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    System.out.println("Couldnt remove sharer " + name);
-                }
-                break;
-            }
-        }
-    }*/
     Set<String> get_user_list(){
         if (this.user_list.isEmpty())
             return null;
@@ -202,13 +163,10 @@ public class ServerCore implements Runnable{
             this.receiving_client = new TreeMap<String, Socket>();
             this.user_list = new TreeMap<String, Socket>();
             this.core = new ServerSocket(this.port);
-            //this.sharing_client_name = new Vector();
-            //this.sharing_client_socket = new Vector();
         }
         catch(Exception e){
             throw e;
         }
-        //this.appendUser("Datpt", null);
     }
     
     public void stop() throws Exception {

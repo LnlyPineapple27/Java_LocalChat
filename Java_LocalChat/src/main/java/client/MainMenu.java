@@ -15,7 +15,7 @@ import javax.swing.table.DefaultTableModel;
 import sound.notification_sound;
 /**
  *
- * @author admin
+ * @author Phan Tan Dat
  */
 public class MainMenu extends javax.swing.JFrame {
     int MAXSIZE = 100;
